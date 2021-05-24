@@ -1,6 +1,6 @@
 ### 修改账号密码
 
-**<font color = red>替换 network_auto_auth.py 第 90, 91行，改为自己的 netid 和密码</font>**
+**<font color = red>替换 network_auto_auth.py 中的账号密码，改为自己的 netid 和密码</font>**
 
 ``` python
 User = 'wjl0n2'
