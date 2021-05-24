@@ -1,0 +1,12 @@
+[Unit]
+Description=Aptiv Network Auto Authentication
+After=network.target
+
+[Service]
+Type=simple
+User=ranger
+Group=ranger
+ExecStart=/usr/bin/python3 /home/ranger/bin/NetworkAutoAuth/network_auto_auth.py &
+
+[Install]
+WantedBy=multi-user.target
