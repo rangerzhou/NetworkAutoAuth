@@ -75,3 +75,69 @@ $ ps -axu | grep network_auto_auth
 ranger    881306  0.2  0.0  35228 22088 ?        Ss   14:11   0:00 /usr/bin/python3 /home/ranger/bin/NetworkAutoAuth/network_auto_auth.py &
 ```
 
+### 监控进程状态
+
+进程有时会被终结，添加一个守护进程对其监控，一旦被终结，则自动重启
+
+monitor.sh
+
+``` shell
+#! /bin/sh
+
+# 当前用户根目录
+host_dir=`echo ~`
+# 进程名
+proc_name="network_auto_auth"
+# 日志文件
+file_name="/home/ranger/bin/NetworkAutoAuth/monitor.log"
+pid=0
+
+# 计算进程数
+proc_num()
+{
+    num=`ps -ef | grep $proc_name | grep -v grep | wc -l`
+    return $num
+}
+
+# 进程号
+proc_id()
+{
+    pid=`ps -ef | grep $proc_name | grep -v grep | awk '{print $2}'`
+}
+
+proc_num
+number=$?
+# 判断进程是否存在
+if [ $number -eq 0 ]
+then
+    # 重启进程的命令，请相应修改
+    sh ~/bin/NetworkAutoAuth/bootstart.sh
+    # 获取新进程号
+    proc_id
+    # 将新进程号和重启时间记录
+    echo ${pid}, `date` >> $file_name
+fi
+```
+
+配置守护进程
+
+``` shell
+$ crontab -e
+*/5 * * * * /home/ranger/bin/NetworkAutoAuth/monitor.sh
+$ sudo service cron restart
+$ sudo service cron reload
+```
+
+测试
+
+``` shell
+# 查询进程号
+$ ps aux | grep network_auto_auth
+# 终结进程测试
+$ sudo kill -9 1591904
+$ ps aux | grep network_auto_auth
+ranger   1593664  0.0  0.0  35236 21916 ?        Ss   11:10   0:02 /usr/bin/python3 /home/ranger/bin/NetworkAutoAuth/network_auto_auth.py &
+$ cat monitor.log
+1593664, Tue 27 Jul 2021 11:10:02 AM CST
+```
+
