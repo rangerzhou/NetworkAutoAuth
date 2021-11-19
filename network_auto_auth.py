@@ -7,6 +7,7 @@ from logging.handlers import TimedRotatingFileHandler
 
 import requests
 import schedule
+import subprocess
 
 
 def setup_log(log_name):
@@ -48,51 +49,42 @@ def setup_log(log_name):
 logger = setup_log("mylog")
 
 
-def login(user, passwd):
+def login():
     format_time = time.strftime("[%Y-%m-%d %H:%M:%S]", time.localtime())
-    test_url = 'http://www.baidu.com'
+    # http://www.msftconnecttest.com/connecttest.txt    Microsoft Connect Test%
+    # http://detectportal.firefox.com/success.txt    success
+    test_url = 'http://detectportal.firefox.com/success.txt'
     try:
         logger.info("测试连接..." + test_url)
         r = requests.get(test_url)
-        index = r.text.find('Kerberos V5 Authentication Redirection')
-        if index != -1:
-            # 测试连接失败，尝试认证
-            logger.info("连接失败，用户认证中...")
-            headers = {
-                # "Host":"internet-na.aptiv.com:6082",
-                # "Content-Type":"application/x-www-form-urlencoded",
-                # "Referer":"https://internet-na.aptiv.com:6082/php/uid.php?vsys=2&rule=73",
-                "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4430.212 Safari/537.36"
-            }
-            data = {
-                'escapeUser': user,
-                'user': user,
-                'passwd': passwd,
-                'ok': 'Login'  # 提交登录
-            }
-            url = 'https://internet-na.aptiv.com:6082/php/uid.php?vsys=2&rule=73'
-            resp = requests.post(url, headers=headers, data=data)
-            if resp.text.find('User Authenticated') != -1:
-                logger.info("用户认证成功...\n")
-            else:
-                logger.warning("用户认证失败...status_code: " + str(resp.status_code) + ", text: " + str(resp.text) + "\n")
-        elif r.status_code == 200:
+        if r.text == "success\n":
             # 连接成功
             logger.info("连接成功，用户已认证...\n")
             return
         else:
-            # 连接异常
-            logger.error("测试连接异常...status_code: " + str(r.status_code) + ", text: " + str(r.text) + "\n")
-            return
+            # 测试连接失败，尝试认证
+            logger.info("连接失败，用户认证中...")
+
+            kinitcmd = "kinit -k -t /home/ranger/bin/NetworkAutoAuth/aptiv.keytab ran.zhou@APTIV.COM"
+            kinitres = subprocess.call(kinitcmd, shell=True)
+
+            curlcmd = "curl -v --negotiate -u : 'http://internet-ap.aptiv.com:6080/php/browser_challenge.php?vsys=1&rule=77&preauthid=&returnreq=y'"
+            curlres = subprocess.call(curlcmd, shell=True)
+
+            if kinitres ==0 and curlres == 0:
+                resp = requests.get(test_url)
+                if resp.text == "success\n":
+                    logger.info("用户认证成功\n")
+                else:
+                    logger.warning("用户认证失败...status_code: " + str(resp.status_code) + ", text: " + str(resp.text) + "\n")
+            else:
+                logger.warning("shell 命令执行失败 - kinitres: " + str(kinitres) + ", curlres: " + str(curlres) + "\n")
     except Exception as e:
-        logger.error("网络连接异常---Exception: " + str(e))
+        logger.error("网络连接异常---Exception: " + str(e) + "\n")
         return
 
-
-User = 'wjl0n2'
-Passwd = 'zr.202104'
-login(User, Passwd)
-schedule.every(5).seconds.do(login, User, Passwd)
+login()
+schedule.every(5).seconds.do(login)
 
 while 1:
     schedule.run_pending()
