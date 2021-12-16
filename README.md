@@ -2,21 +2,55 @@
 
 
 
-**<font color = red>20211118更新：公司服务器迁移，认证方式修改，旧版本的账号密码登录直接行不通了，弹不出登录界面了</font>**
+**<font color = red>20211118更新：公司服务器迁移，认证方式修改，旧版本的账号密码直接登录认证行不通了，弹不出登录界面了</font>**
+
+---
+
+### 1. 懒人总结
+
+#### 1.1 安装依赖
+
+``` shell
+sudo apt install krb5-user
+pip3 install schedule
+```
+
+#### 1.2 keytab
+
+根据个人信息按照 **步骤1**重新生成 *keytab*
+
+#### 1.3 network_auto_auth.py
+
+根据 *keytab* 的目录和个人认证账号（xxx@APTIV.COM）修改 `kinitcmd` 值
+
+#### 1.4 network_auto_auth.service
+
+修改 `User` 和 `Group`
+
+``` shell
+$ whoami
+ranger
+```
+
+根据 *network_auto_auth.py* 目录修改 `ExecStart` 值
+
+#### 1.5 bootstart.sh
+
+配置好上面信息后直接执行 *bootstart.sh* 即可，第一次执行后，把脚本中的 `sudo cp network_auto_auth.service /etc/systemd/system/network_auto_auth.service` 注释掉，以后出问题时重新执行此脚本即可
 
 
 
 ---
 
-### 1. 生成秘钥表（keytab）
+### 2. 生成秘钥表（keytab）
 
-#### 1.1 安装 krb5-user
+#### 2.1 安装 krb5-user
 
 ``` shell
 $ sudo apt install krb5-user
 ```
 
-#### 1.2 生成秘钥表
+#### 2.2 生成秘钥表
 
 ``` shell
 $ ktutil
@@ -36,7 +70,7 @@ ktutil:  q
 
 <font color = red>**注意必须是大写的 @APTIV.COM，需要修改秘钥表的保存位置，在 Linux 生成 keytab 比较方便，经测试生成的 keytab 文件 windows 下也可使用**</font>
 
-#### 1.3 认证
+#### 2.3 认证
 
 ``` shell
 # kinit 获取并缓存 principal（当前主体）的初始票据授予票据（TGT），用于 Kerberos 系统进行身份安全验证
@@ -47,7 +81,7 @@ $ curl -v --negotiate -u : 'http://internet-ap.aptiv.com:6080/php/browser_challe
 
 
 
-#### 1.4 测试
+#### 2.4 测试
 
 ``` shell
 # 认证成功
@@ -82,7 +116,9 @@ Valid starting       Expires              Service principal
 
 可以看到加密方式为 *aes256-cts-hmac-sha1-96*
 
-### 2. 自动认证脚本
+### 3. 自动认证脚本
+
+**network_auto_auth.py**
 
 ``` python
 import logging
@@ -195,7 +231,7 @@ User = 'wjl0n2'
 Passwd = '123456'
 ```
 
-### 3. 配置开机启动（Linux 系统）
+### 4. 配置开机启动（Linux 系统）
 
 **network_auto_auth.service**
 
@@ -261,7 +297,7 @@ $ ps -axu | grep network_auto_auth
 ranger    881306  0.2  0.0  35228 22088 ?        Ss   14:11   0:00 /usr/bin/python3 /home/ranger/bin/NetworkAutoAuth/network_auto_auth.py &
 ```
 
-### 4. 监控进程状态(有 bug)
+### 5. 监控进程状态(有 bug)
 
 进程有时会被终结，添加一个守护进程对其监控，一旦被终结，则自动重启
 
@@ -327,17 +363,17 @@ $ cat monitor.log
 1593664, Tue 27 Jul 2021 11:10:02 AM CST
 ```
 
-### 5. Windows 下使用
+### 6. Windows 下使用
 
-#### 5.1 安装 Kerberos-Windows 客户端
+#### 6.1 安装 Kerberos-Windows 客户端
 
 下载地址：http://web.mit.edu/kerberos/dist/，选择 MIT Kerberos for Windows 4.1，重启电脑，会自动配置环境变量到 path，但是需要把对应的环境变量移动到最前面，默认安装路径：C:\Program Files\MIT\Kerberos\bin ，使用 *C:\Program Files\MIT\Kerberos\bin* 下的 `klist` `kinit` 命令
 
-#### 5.2 Windows 安装 curl
+#### 6.2 Windows 安装 curl
 
 下载地址：https://curl.se/windows/
 
-#### 5.3 其他步骤
+#### 6.3 其他步骤
 
 同 Linux
 
