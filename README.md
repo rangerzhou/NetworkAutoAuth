@@ -2,7 +2,7 @@
 
 
 
-**<font color = red>20211118更新：公司服务器迁移，认证方式修改，旧版本的账号密码直接登录认证行不通了，弹不出登录界面了</font>**
+**<font color = red>20211118更新：公司服务器迁移，修改认证方式，旧版本的账号密码直接登录认证行不通了，弹不出登录界面了，更新 keytab 认证方式</font>**
 
 ---
 
@@ -17,7 +17,7 @@ pip3 install schedule
 
 #### 1.2 keytab
 
-根据个人信息按照 **步骤1**重新生成 *keytab*
+根据个人信息按照 **步骤2** 重新生成 *keytab*
 
 #### 1.3 network_auto_auth.py
 
@@ -68,13 +68,21 @@ slot KVNO Principal
 ktutil:  q
 ```
 
-<font color = red>**注意必须是大写的 @APTIV.COM，需要修改秘钥表的保存位置，在 Linux 生成 keytab 比较方便，经测试生成的 keytab 文件 windows 下也可使用**</font>
+<font color = red>**提示：**</font>
+
+- 必须是大写的 @APTIV.COM，需要修改秘钥表的保存位置，在 Linux 生成 keytab 比较方便，经测试生成的 keytab 文件 windows 下也可使用；
+
+- 生成新的秘钥表时必须先删除原有的 keytab 文件，否则有可能生成失败，执行 kinit xxx 命令进行认证时会报如下错误：
+
+  ``` shell
+  kinit: Preauthentication failed while getting initial credentials
+  ```
 
 #### 2.3 认证
 
 ``` shell
 # kinit 获取并缓存 principal（当前主体）的初始票据授予票据（TGT），用于 Kerberos 系统进行身份安全验证
-$ kinit -k -t /home/ranger/bin/NetworkAutoAuth/ranger.keytab ran.zhou@APTIV.COM # 大写的 @APTIV.COM
+$ kinit -k -t /home/ranger/bin/NetworkAutoAuth/aptiv.keytab ran.zhou@APTIV.COM # 大写的 @APTIV.COM
 # APTIV 网络认证
 $ curl -v --negotiate -u : 'http://internet-ap.aptiv.com:6080/php/browser_challenge.php?vsys=1&rule=77&preauthid=&returnreq=y'
 ```
