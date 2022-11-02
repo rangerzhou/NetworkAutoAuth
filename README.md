@@ -34,7 +34,11 @@ ranger
 
 根据 *network_auto_auth.py* 目录修改 `ExecStart` 值
 
-#### 1.5 bootstart.sh
+#### 1.5 修改监控进程文件目录
+
+把 monitor.sh 中相关目录改成自己的目录
+
+#### 1.6 bootstart.sh
 
 配置好上面信息后直接执行 *bootstart.sh* 即可，以后出问题时重新执行此脚本即可
 
@@ -353,6 +357,7 @@ fi
 
 ``` shell
 $ crontab -e
+# 分　 时　 日　 月　 周，/5: 表示每 5 分钟
 */5 * * * * /home/ranger/bin/NetworkAutoAuth/monitor.sh
 $ sudo service cron restart
 $ sudo service cron reload
@@ -389,29 +394,15 @@ $ cat monitor.log
 
 
 
-### 7. 添加时间同步脚本
-
-SyncTime.sh
+### 7. 添加时间同步
 
 ``` shell
-#!/bin/bash
-sudo date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
+$ crontab -e
+# 分　 时　 日　 月　 周，/1: 表示每 1 分钟
+*/1 * * * * /home/ranger/bin/NetworkAutoAuth/monitor.sh
+$ sudo service cron restart
+$ sudo service cron reload
 ```
 
-sync_time.service
 
-``` bash
-[Unit]
-Description=Time sync
-After=network.target
-
-[Service]
-Type=simple
-User=ranger
-Group=ranger
-ExecStart=sudo sh /home/ranger/bin/NetworkAutoAuth/SyncTime.sh
-
-[Install]
-WantedBy=multi-user.target
-```
 
