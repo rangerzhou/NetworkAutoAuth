@@ -27,8 +27,10 @@
 终端进入 *NetworkAutoAuth* 目录，执行 *bootstart.sh* 脚本即可；
 
 ``` shell
-$ ./bootstart.sh xxx.xxx@APTIV.COM
+$ ./bootstart.sh ran.zhou@APTIV.COM
 ```
+
+<font color=red>**邮箱名后缀一定要是大写的，用户名为小写；**</font>
 
 提示：如果不想跟 xxx.xxx@APTIV.COM 参数，则修改 bootstart.sh 脚本中第 8 行 email 值，并打开注释使之生效，并修改第 20 行的 "$1" 为 "$email"；
 
