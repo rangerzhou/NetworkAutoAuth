@@ -22,9 +22,9 @@
 
 根据个人信息按照 **2.1, 2.2** 生成自己的 *keytab*；
 
-#### 1.2 执行脚本
+#### 1.2 执行启动脚本
 
-终端进入 *NetworkAutoAuth* 目录，执行 *bootstart.sh* 脚本即可；
+**终端进入 *NetworkAutoAuth* 目录，执行如下命令即可：**
 
 ``` shell
 $ ./bootstart.sh ran.zhou@APTIV.COM
