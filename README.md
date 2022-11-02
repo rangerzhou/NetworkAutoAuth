@@ -36,7 +36,7 @@ ranger
 
 #### 1.5 bootstart.sh
 
-配置好上面信息后直接执行 *bootstart.sh* 即可，第一次执行后，把脚本中的 `sudo cp network_auto_auth.service /etc/systemd/system/network_auto_auth.service` 注释掉，以后出问题时重新执行此脚本即可
+配置好上面信息后直接执行 *bootstart.sh* 即可，以后出问题时重新执行此脚本即可
 
 
 
@@ -386,3 +386,32 @@ $ cat monitor.log
 同 Linux
 
 在 Linux 生成 keytab 比较方便，经测试生成的 keytab 文件 windows 下也可使用
+
+
+
+### 7. 添加时间同步脚本
+
+SyncTime.sh
+
+``` shell
+#!/bin/bash
+sudo date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
+```
+
+sync_time.service
+
+``` bash
+[Unit]
+Description=Time sync
+After=network.target
+
+[Service]
+Type=simple
+User=ranger
+Group=ranger
+ExecStart=sudo sh /home/ranger/bin/NetworkAutoAuth/SyncTime.sh
+
+[Install]
+WantedBy=multi-user.target
+```
+
