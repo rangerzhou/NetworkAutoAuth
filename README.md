@@ -36,6 +36,10 @@ $ ./bootstart.sh ran.zhou@APTIV.COM
 
 
 
+
+
+
+
 <font color=red>**以下为非必选项**</font>
 
 #### 1.3 配置进程监控（非必选）
@@ -173,7 +177,7 @@ $ sudo service cron restart
 $ sudo service cron reload
 ```
 
-
+---
 
 ### 5. Windows 下使用
 
