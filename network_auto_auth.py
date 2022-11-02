@@ -49,7 +49,10 @@ def setup_log(log_name):
 logger = setup_log("mylog")
 
 
-def login():
+def login(currentDir, email):
+    logger.info("currentDir: "+currentDir+", email: "+email)
+
+
     format_time = time.strftime("[%Y-%m-%d %H:%M:%S]", time.localtime())
     # http://www.msftconnecttest.com/connecttest.txt    Microsoft Connect Test%
     # http://detectportal.firefox.com/success.txt    success
@@ -65,7 +68,9 @@ def login():
             # 测试连接失败，尝试认证
             logger.info("连接失败，用户认证中...")
 
-            kinitcmd = "kinit -k -t /home/ranger/bin/NetworkAutoAuth/aptiv.keytab ran.zhou@APTIV.COM"
+            #kinitcmd = "kinit -k -t ~/NetworkAutoAuth/aptiv.keytab ran.zhou@APTIV.COM"
+            kinitcmd = "kinit -k -t "+currentDir+"/aptiv.keytab "+email
+            logger.info("----------------------" +kinitcmd)
             kinitres = subprocess.call(kinitcmd, shell=True)
 
             curlcmd = "curl -v --negotiate -u : 'http://internet-ap.aptiv.com:6080/php/browser_challenge.php?vsys=1&rule=77&preauthid=&returnreq=y'"
@@ -83,8 +88,8 @@ def login():
         logger.error("网络连接异常---Exception: " + str(e) + "\n")
         return
 
-login()
-schedule.every(5).seconds.do(login)
+login(sys.argv[1], sys.argv[2])
+schedule.every(5).seconds.do(login, sys.argv[1], sys.argv[2])
 
 while 1:
     schedule.run_pending()

@@ -2,47 +2,47 @@
 
 
 
-**<font color = red>20211118更新：公司服务器迁移，修改认证方式，旧版本的账号密码直接登录认证行不通了，弹不出登录界面了，更新 keytab 认证方式</font>**
+**<font color = red>20221102更新：简化脚本配置复杂度，仅两步即可完成配置；</font>**
+
+文件说明：
+
+- network_auto_auth.py: 网络认证脚本；
+- monitor.sh: 进程监控脚本；
+- bootstart.sh: 初始化脚本（包括安装依赖、配置网络认证脚本开机启动执行）；
+- SyncTime.sh: 时间同步脚本；
+- mylog: 网络认证脚本日志文件；
+- monitor.log: 进程监控脚本日志文件；
+- aptiv.keytab: 网络认证 key；
 
 ---
 
-### 1. 懒人总结
+### 1. 两步完成配置
 
-#### 1.1 安装依赖
+#### 1.1 生成 keytab 文件
 
-``` shell
-sudo apt install krb5-user
-pip3 install schedule
-```
+根据个人信息按照 **2.1, 2.2** 生成自己的 *keytab*；
 
-#### 1.2 keytab
+#### 1.2 执行脚本
 
-根据个人信息按照 **步骤2** 重新生成 *keytab*
-
-#### 1.3 network_auto_auth.py
-
-根据 *keytab* 的目录和个人认证账号（xxx@APTIV.COM）修改 `kinitcmd` 值
-
-#### 1.4 network_auto_auth.service
-
-修改 `User` 和 `Group`
+终端进入 *NetworkAutoAuth* 目录，执行 *bootstart.sh* 脚本即可；
 
 ``` shell
-$ whoami
-ranger
+$ ./bootstart.sh xxx.xxx@APTIV.COM
 ```
 
-根据 *network_auto_auth.py* 目录修改 `ExecStart` 值
-
-#### 1.5 修改监控进程文件目录
-
-把 monitor.sh 中相关目录改成自己的目录
-
-#### 1.6 bootstart.sh
-
-配置好上面信息后直接执行 *bootstart.sh* 即可，以后出问题时重新执行此脚本即可
+提示：如果不想跟 xxx.xxx@APTIV.COM 参数，则修改 bootstart.sh 脚本中第 8 行 email 值，并打开注释使之生效，并修改第 20 行的 "$1" 为 "$email"；
 
 
+
+<font color=red>**以下为非必选项**</font>
+
+#### 1.3 配置进程监控（非必选）
+
+参照第 3 节配置，非必选项；
+
+#### 1.4 配置时间同步（非必须）
+
+参照第 4 节配置，非必选项；
 
 ---
 
@@ -82,7 +82,7 @@ ktutil:  q
   kinit: Preauthentication failed while getting initial credentials
   ```
 
-#### 2.3 认证
+#### 2.3 手动认证（用于测试 keytab 是否有效）
 
 ``` shell
 # kinit 获取并缓存 principal（当前主体）的初始票据授予票据（TGT），用于 Kerberos 系统进行身份安全验证
@@ -93,7 +93,7 @@ $ curl -v --negotiate -u : 'http://internet-ap.aptiv.com:6080/php/browser_challe
 
 
 
-#### 2.4 测试
+#### 2.4 测试网络状态
 
 ``` shell
 # 认证成功
@@ -128,237 +128,20 @@ Valid starting       Expires              Service principal
 
 可以看到加密方式为 *aes256-cts-hmac-sha1-96*
 
-### 3. 自动认证脚本
-
-**network_auto_auth.py**
-
-``` python
-import logging
-import os
-import re
-import sys
-import time
-from logging.handlers import TimedRotatingFileHandler
-
-import requests
-import schedule
-import subprocess
-
-
-def setup_log(log_name):
-    # 创建logger对象, 传入logger名字
-    mylogger = logging.getLogger(log_name)
-    log_path = os.path.join(sys.path[0], "./", log_name)
-    mylogger.setLevel(logging.INFO)
-    formatter = logging.Formatter(
-        "[%(asctime)s] [%(process)d] [%(levelname)s] - %(module)s.%(funcName)s (%(filename)s:%(lineno)d) - %(message)s")
-
-    # 定义日志输出格式,interval: 滚动周期;
-    # when="MIDNIGHT": 表示每天0点为更新点
-    # interval=1: 每天生成一个文件;
-    # backupCount: 表示日志保存个数
-
-    # 使用 FileHandler 输出到文件
-    file_handler = TimedRotatingFileHandler(
-        filename=log_path, when="MIDNIGHT", interval=1, backupCount=3
-    )
-    file_handler.setLevel(logging.INFO)
-    file_handler.setFormatter(formatter)
-
-    # filename="mylog" suffix设置，会生成文件名为mylog.2020-02-25.log
-    file_handler.suffix = "%Y-%m-%d.log"
-    # extMatch是编译好正则表达式，用于匹配日志文件名后缀
-    # 需要注意的是suffix和extMatch一定要匹配的上，如果不匹配，过期日志不会被删除。
-    file_handler.extMatch = re.compile(r"^\d{4}-\d{2}-\d{2}.log$")
-
-    # # 使用 StreamHandler 输出到屏幕
-    stream_handler = logging.StreamHandler()
-    stream_handler.setLevel(logging.INFO)
-    stream_handler.setFormatter(formatter)
-
-    mylogger.addHandler(file_handler)
-    mylogger.addHandler(stream_handler)
-    return mylogger
-
-
-logger = setup_log("mylog")
-
-
-def login():
-    format_time = time.strftime("[%Y-%m-%d %H:%M:%S]", time.localtime())
-    # http://www.msftconnecttest.com/connecttest.txt    Microsoft Connect Test%
-    # http://detectportal.firefox.com/success.txt    success
-    test_url = 'http://detectportal.firefox.com/success.txt'
-    try:
-        logger.info("测试连接..." + test_url)
-        r = requests.get(test_url)
-        if r.text == "success\n":
-            # 连接成功
-            logger.info("连接成功，用户已认证...\n")
-            return
-        else:
-            # 测试连接失败，尝试认证
-            logger.info("连接失败，用户认证中...")
-
-            kinitcmd = "kinit -k -t /home/ranger/bin/NetworkAutoAuth/aptiv.keytab ran.zhou@APTIV.COM"
-            kinitres = subprocess.call(kinitcmd, shell=True)
-
-            curlcmd = "curl -v --negotiate -u : 'http://internet-ap.aptiv.com:6080/php/browser_challenge.php?vsys=1&rule=77&preauthid=&returnreq=y'"
-            curlres = subprocess.call(curlcmd, shell=True)
-
-            if kinitres ==0 and curlres == 0:
-                resp = requests.get(test_url)
-                if resp.text == "success\n":
-                    logger.info("用户认证成功\n")
-                else:
-                    logger.warning("用户认证失败...status_code: " + str(resp.status_code) + ", text: " + str(resp.text) + "\n")
-            else:
-                logger.warning("shell 命令执行失败\n")
-    except Exception as e:
-        logger.error("网络连接异常---Exception: " + str(e) + "\n")
-        return
-
-login()
-schedule.every(5).seconds.do(login)
-
-while 1:
-    schedule.run_pending()
-    time.sleep(5)
-```
-
-<font color = red>**需修改 *kinitcmd* 值为自己 keytab 的目录 和 *用户名*** </font>
-
-编辑 **network_auto_auth.service** ，和 **bootstart.sh** 放在同一目录，执行 **bootstart.sh** 即可启动脚本认证并开机自动启动。
-
 ---
 
-
-
-### ~~修改账号密码（旧版本认证，已废弃）~~
-
-~~**<font color = red>替换 network_auto_auth.py 中的账号密码，改为自己的 netid 和密码</font>**~~
-
-``` python
-User = 'wjl0n2'
-Passwd = '123456'
-```
-
-### 4. 配置开机启动（Linux 系统）
-
-**network_auto_auth.service**
-
-``` shell
-[Unit]
-Description=Aptiv Network Auto Authentication
-After=network.target
-
-[Service]
-Type=simple
-User=ranger
-Group=ranger
-ExecStart=/usr/bin/python3 /home/ranger/bin/NetworkAutoAuth/network_auto_auth.py &
-
-[Install]
-WantedBy=multi-user.target
-```
-
-**<font color = red>根据自己电脑环境修改 `ExecStart, User, Group`，User 和 Group 直接改为 root 也可以 。</font>**
-
-
-
-**bootstart.sh**
-
-``` shell
-#!/bin/bash
-# 把开机启动 service 添加到 /etc/systemd/system/ 目录下
-sudo cp network_auto_auth.service /etc/systemd/system/network_auto_auth.service
-
-sudo systemctl stop network_auto_auth.service
-sudo systemctl enable network_auto_auth.service
-sudo systemctl is-enabled network_auto_auth.service
-sudo systemctl daemon-reload
-# 启动服务
-sudo systemctl start network_auto_auth.service
-# 查看状态
-sudo systemctl status network_auto_auth.service
-ps -axu | grep network_auto_auth
-exit
-```
-
-
-
-**把开机启动 service 添加到 /etc/systemd/system/ 目录下，并使其生效：**
-
-``` shell
-# 配置启动
-$ ./bootstart.sh
-enabled
-● network_auto_auth.service - Aptiv Network Auto Authentication
-     Loaded: loaded (/etc/systemd/system/network_auto_auth.service; enabled; vendor preset: enabled)
-     Active: active (running) since Fri 2021-05-21 14:11:31 CST; 15ms ago
-   Main PID: 881306 (python3)
-      Tasks: 1 (limit: 38099)
-     Memory: 1.8M
-     CGroup: /system.slice/network_auto_auth.service
-             └─881306 /usr/bin/python3 /home/ranger/bin/NetworkAutoAuth/network_auto_auth.py &
-
-5月 21 14:11:31 mintos systemd[1]: Started Aptiv Network Auto Authentication.
-
-# 查看脚本是否启动成功
-$ ps -axu | grep network_auto_auth
-ranger    881306  0.2  0.0  35228 22088 ?        Ss   14:11   0:00 /usr/bin/python3 /home/ranger/bin/NetworkAutoAuth/network_auto_auth.py &
-```
-
-### 5. 监控进程状态(有 bug)
+### 3. 监控进程状态(有 bug，非必选项)
 
 进程有时会被终结，添加一个守护进程对其监控，一旦被终结，则自动重启
 
 monitor.sh
-
-``` shell
-#! /bin/sh
-
-# 当前用户根目录
-host_dir=`echo ~`
-# 进程名
-proc_name="network_auto_auth"
-# 日志文件
-file_name="/home/ranger/bin/NetworkAutoAuth/monitor.log"
-pid=0
-
-# 计算进程数
-proc_num()
-{
-    num=`ps -ef | grep $proc_name | grep -v grep | wc -l`
-    return $num
-}
-
-# 进程号
-proc_id()
-{
-    pid=`ps -ef | grep $proc_name | grep -v grep | awk '{print $2}'`
-}
-
-proc_num
-number=$?
-# 判断进程是否存在
-if [ $number -eq 0 ]
-then
-    # 重启进程的命令，请相应修改
-    sh ~/bin/NetworkAutoAuth/bootstart.sh
-    # 获取新进程号
-    proc_id
-    # 将新进程号和重启时间记录
-    echo ${pid}, `date` >> $file_name
-fi
-```
 
 配置守护进程
 
 ``` shell
 $ crontab -e
 # 分　 时　 日　 月　 周，/5: 表示每 5 分钟
-*/5 * * * * /home/ranger/bin/NetworkAutoAuth/monitor.sh
+*/5 * * * * ~/NetworkAutoAuth/monitor.sh
 $ sudo service cron restart
 $ sudo service cron reload
 ```
@@ -376,33 +159,32 @@ $ cat monitor.log
 1593664, Tue 27 Jul 2021 11:10:02 AM CST
 ```
 
-### 6. Windows 下使用
+---
 
-#### 6.1 安装 Kerberos-Windows 客户端
-
-下载地址：http://web.mit.edu/kerberos/dist/，选择 MIT Kerberos for Windows 4.1，重启电脑，会自动配置环境变量到 path，但是需要把对应的环境变量移动到最前面，默认安装路径：C:\Program Files\MIT\Kerberos\bin ，使用 *C:\Program Files\MIT\Kerberos\bin* 下的 `klist` `kinit` 命令
-
-#### 6.2 Windows 安装 curl
-
-下载地址：https://curl.se/windows/
-
-#### 6.3 其他步骤
-
-同 Linux
-
-在 Linux 生成 keytab 比较方便，经测试生成的 keytab 文件 windows 下也可使用
-
-
-
-### 7. 添加时间同步
+### 4. 添加时间同步（非必选项）
 
 ``` shell
 $ crontab -e
 # 分　 时　 日　 月　 周，/1: 表示每 1 分钟
-*/1 * * * * /home/ranger/bin/NetworkAutoAuth/monitor.sh
+*/1 * * * * ~/NetworkAutoAuth/SyncTime.sh
 $ sudo service cron restart
 $ sudo service cron reload
 ```
 
 
 
+### 5. Windows 下使用
+
+#### 5.1 安装 Kerberos-Windows 客户端
+
+下载地址：http://web.mit.edu/kerberos/dist/，选择 MIT Kerberos for Windows 4.1，重启电脑，会自动配置环境变量到 path，但是需要把对应的环境变量移动到最前面，默认安装路径：C:\Program Files\MIT\Kerberos\bin ，使用 *C:\Program Files\MIT\Kerberos\bin* 下的 `klist` `kinit` 命令
+
+#### 5.2 Windows 安装 curl
+
+下载地址：https://curl.se/windows/
+
+#### 5.3 其他步骤
+
+同 Linux
+
+在 Linux 生成 keytab 比较方便，经测试生成的 keytab 文件 windows 下也可使用

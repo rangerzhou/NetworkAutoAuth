@@ -5,7 +5,7 @@ host_dir=`echo ~`
 # 进程名
 proc_name="network_auto_auth"
 # 日志文件
-file_name="/home/ranger/bin/NetworkAutoAuth/monitor.log"
+file_name="~/NetworkAutoAuth/monitor.log"
 pid=0
 
 # 计算进程数
@@ -27,7 +27,7 @@ number=$?
 if [ $number -eq 0 ]
 then
     # 重启进程的命令，请相应修改
-    sh ~/bin/NetworkAutoAuth/bootstart.sh
+    sh ~/NetworkAutoAuth/bootstart.sh
     # 获取新进程号
     proc_id
     # 将新进程号和重启时间记录
