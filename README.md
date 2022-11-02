@@ -140,14 +140,13 @@ Valid starting       Expires              Service principal
 
 进程有时会被终结，添加一个守护进程对其监控，一旦被终结，则自动重启
 
-monitor.sh
-
 配置守护进程
 
 ``` shell
 $ crontab -e
 # 分　 时　 日　 月　 周，/5: 表示每 5 分钟
 */5 * * * * ~/NetworkAutoAuth/monitor.sh
+
 $ sudo service cron restart
 $ sudo service cron reload
 ```
