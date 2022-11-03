@@ -1,5 +1,6 @@
 ---
 Author: ran.zhou@aptiv.com
+Version: v22.11.03
 ---
 
 
@@ -14,7 +15,7 @@ Author: ran.zhou@aptiv.com
 
 - network_auto_auth.py: 网络认证脚本；
 - monitor.sh: 进程监控脚本；
-- bootstart.sh: 初始化脚本（包括安装依赖、配置网络认证脚本开机启动执行）；
+- bootstart.sh: 初始化脚本（包括同步时间、安装依赖、生成 keytab、配置网络认证脚本、配置开机启动服务）；
 - SyncTime.sh: 时间同步脚本；
 - mylog: 网络认证脚本日志文件；
 - monitor.log: 进程监控脚本日志文件；
