@@ -11,6 +11,8 @@ Version: v22.11.03
 
 **<font color = red>20221103更新：简化脚本配置复杂度，仅 1 步即可完成配置；</font>**
 
+脚本下载地址：https://confluence.asux.aptiv.com/pages/viewpage.action?pageId=313967372
+
 文件说明：
 
 - network_auto_auth.py: 网络认证脚本；
