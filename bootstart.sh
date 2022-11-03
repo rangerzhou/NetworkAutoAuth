@@ -1,4 +1,6 @@
 #!/bin/bash
+
+# version: v2.1
 # 1.同步时间
 sudo date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
 
