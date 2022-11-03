@@ -1,3 +1,9 @@
+---
+Author: ran.zhou@aptiv.com
+---
+
+
+
 > 公司自己安装的操作系统，网络每隔 8 小时需要手动 ~~点击登录~~ 认证一次，本脚本每隔 5 秒钟检测一次网络状态，若认证超时则自动重新认证，可代替手动认证，太懒了没办法 O(∩_∩)O~
 
 
@@ -53,7 +59,7 @@ $ sudo apt install krb5-user
 $ ktutil
 ktutil:  addent -password -p ran.zhou@APTIV.COM -k 1 -e aes256-cts-hmac-sha1-96
 Password for ran.zhou@APTIV.COM:
-ktutil:  wkt /home/ranger/bin/NetworkAutoAuth/aptiv.keytab # 此处修改为自己的目录
+ktutil:  wkt ~/NetworkAutoAuth/aptiv.keytab # 此处修改为自己的目录
 ktutil:  l
 slot KVNO Principal
 ---- ---- ---------------------------------------------------------------------
