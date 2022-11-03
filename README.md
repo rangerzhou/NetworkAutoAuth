@@ -8,7 +8,7 @@ Author: ran.zhou@aptiv.com
 
 
 
-**<font color = red>20221102更新：简化脚本配置复杂度，仅两步即可完成配置；</font>**
+**<font color = red>20221103更新：简化脚本配置复杂度，仅 1 步即可完成配置；</font>**
 
 文件说明：
 
