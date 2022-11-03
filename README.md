@@ -16,39 +16,26 @@
 
 ---
 
-### 1. 两步完成配置
+### 1. 一键完成配置
 
-#### 1.1 生成 keytab 文件
-
-根据个人信息按照 **2.1, 2.2** 生成自己的 *keytab*；
-
-#### 1.2 执行启动脚本
+#### 1.1 执行启动脚本
 
 **终端进入 *NetworkAutoAuth* 目录，执行如下命令即可：**
 
 ``` shell
-$ ./bootstart.sh ran.zhou@APTIV.COM
+# bash bootstart.sh 邮箱名 邮箱密码
+$ bash bootstart.sh abc.xyz@APTIV.COM password
 ```
 
 <font color=red>**邮箱名后缀一定要是大写的，用户名为小写；**</font>
-
-提示：如果不想跟 xxx.xxx@APTIV.COM 参数，则修改 bootstart.sh 脚本中第 8 行 email 值，并打开注释使之生效，并修改第 20 行的 "$1" 为 "$email"；
-
-
-
-
 
 
 
 <font color=red>**以下为非必选项**</font>
 
-#### 1.3 配置进程监控（非必选）
+#### 1.2 配置进程监控（非必选）
 
 参照第 3 节配置，非必选项；
-
-#### 1.4 配置时间同步（非必须）
-
-参照第 4 节配置，非必选项；
 
 ---
 
@@ -110,7 +97,9 @@ $ curl http://detectportal.firefox.com/success.txt
 curl: (56) Recv failure: Connection reset by peer
 ```
 
+#### 2.5 常见异常
 
+##### 2.5.1 加密方式错误
 
 如果获取 TGT 过程提示 `kinit: Pre-authentication failed: No key table entry found for ran.zhou@aptiv.com while getting initial credentials`
 
@@ -133,6 +122,17 @@ Valid starting       Expires              Service principal
 ```
 
 可以看到加密方式为 *aes256-cts-hmac-sha1-96*
+
+##### 2.5.2 密码错误
+
+密码错误时执行 kinit 验证时会输出如下错误：
+
+``` shell
+$ kinit -k -t test.keytab abc.xyz@APTIV.COM
+kinit: Preauthentication failed while getting initial credentials
+```
+
+
 
 ---
 
@@ -166,30 +166,18 @@ $ cat monitor.log
 
 ---
 
-### 4. 添加时间同步（非必选项）
+### 4. Windows 下使用
 
-``` shell
-$ crontab -e
-# 分　 时　 日　 月　 周，/1: 表示每 1 分钟
-*/1 * * * * ~/NetworkAutoAuth/SyncTime.sh
-$ sudo service cron restart
-$ sudo service cron reload
-```
-
----
-
-### 5. Windows 下使用
-
-#### 5.1 安装 Kerberos-Windows 客户端
+#### 4.1 安装 Kerberos-Windows 客户端
 
 下载地址：http://web.mit.edu/kerberos/dist/，选择 MIT Kerberos for Windows 4.1，重启电脑，会自动配置环境变量到 path，但是需要把对应的环境变量移动到最前面，默认安装路径：C:\Program Files\MIT\Kerberos\bin ，使用 *C:\Program Files\MIT\Kerberos\bin* 下的 `klist` `kinit` 命令
 
-#### 5.2 Windows 安装 curl
+#### 4.2 Windows 安装 curl
 
 下载地址：https://curl.se/windows/
 
-#### 5.3 其他步骤
+#### 4.3 其他步骤
 
 同 Linux
 
-在 Linux 生成 keytab 比较方便，经测试生成的 keytab 文件 windows 下也可使用
+**最简单的还是在 Linux 生成 keytab，经测试生成的 keytab 文件 windows 下也可使用**

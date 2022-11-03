@@ -52,7 +52,6 @@ logger = setup_log("mylog")
 def login(currentDir, email):
     logger.info("currentDir: "+currentDir+", email: "+email)
 
-
     format_time = time.strftime("[%Y-%m-%d %H:%M:%S]", time.localtime())
     # http://www.msftconnecttest.com/connecttest.txt    Microsoft Connect Test%
     # http://detectportal.firefox.com/success.txt    success
@@ -68,9 +67,7 @@ def login(currentDir, email):
             # 测试连接失败，尝试认证
             logger.info("连接失败，用户认证中...")
 
-            #kinitcmd = "kinit -k -t ~/NetworkAutoAuth/aptiv.keytab ran.zhou@APTIV.COM"
-            kinitcmd = "kinit -k -t "+currentDir+"/aptiv.keytab "+email
-            logger.info("----------------------" +kinitcmd)
+            kinitcmd = "kinit -k -t "+currentDir+" "+email
             kinitres = subprocess.call(kinitcmd, shell=True)
 
             curlcmd = "curl -v --negotiate -u : 'http://internet-ap.aptiv.com:6080/php/browser_challenge.php?vsys=1&rule=77&preauthid=&returnreq=y'"
