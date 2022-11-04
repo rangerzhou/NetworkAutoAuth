@@ -1,13 +1,13 @@
 ---
 Author: ran.zhou@aptiv.com
-Version: v22.11.03
+Version: v22.11.04
 ---
 
 
 
 > 公司自己安装的操作系统，网络每隔 8 小时需要手动 ~~点击登录~~ 认证一次，本脚本每隔 5 秒钟检测一次网络状态，若认证超时则自动重新认证，可代替手动认证，太懒了没办法 O(∩_∩)O~
 
-
+**<font color = red>20221104更新：添加定时执行脚本；</font>**
 
 **<font color = red>20221103更新：简化脚本配置复杂度，仅 1 步即可完成配置；</font>**
 
@@ -33,7 +33,7 @@ Version: v22.11.03
 
 ``` shell
 # bash bootstart.sh 邮箱名 邮箱密码
-$ bash bootstart.sh abc.xyz@APTIV.COM password
+$ bash bootstart.sh abc.xyz@APTIV.COM Aa123456789
 ```
 
 <font color=red>**邮箱名后缀一定要是大写的，用户名为小写；**</font>
@@ -45,6 +45,10 @@ $ bash bootstart.sh abc.xyz@APTIV.COM password
 #### 1.2 配置进程监控（非必选）
 
 参照第 3 节配置，非必选项；
+
+#### 1.3 配置定时执行脚本（非必选，推荐）
+
+参照第 4 节配置；
 
 ---
 
@@ -175,17 +179,35 @@ $ cat monitor.log
 
 ---
 
-### 4. Windows 下使用
+### 4. 定时执行脚本
 
-#### 4.1 安装 Kerberos-Windows 客户端
+也可以添加定时任务，每隔一定时间执行一次启动脚本，这样可以预防进程没挂但是出现其他异常的情况；
+
+``` shell
+$ crontab -e
+# 分　 时　 日　 月　 周
+* 0 * * * bash bootstart.sh abc.xyz@APTIV.COM Aa123456789
+
+# 或者直接编辑添加到末尾
+$ sudo vim /var/spool/cron/crontabs/用户名
+
+$ sudo service cron restart
+$ sudo service cron reload
+```
+
+每天 0 点执行一次脚本（**脚本路径根据自己的路径修改**）；
+
+### 5. Windows 下使用
+
+#### 5.1 安装 Kerberos-Windows 客户端
 
 下载地址：http://web.mit.edu/kerberos/dist/，选择 MIT Kerberos for Windows 4.1，重启电脑，会自动配置环境变量到 path，但是需要把对应的环境变量移动到最前面，默认安装路径：C:\Program Files\MIT\Kerberos\bin ，使用 *C:\Program Files\MIT\Kerberos\bin* 下的 `klist` `kinit` 命令
 
-#### 4.2 Windows 安装 curl
+#### 5.2 Windows 安装 curl
 
 下载地址：https://curl.se/windows/
 
-#### 4.3 其他步骤
+#### 5.3 其他步骤
 
 同 Linux
 
