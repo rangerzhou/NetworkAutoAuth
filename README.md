@@ -92,12 +92,10 @@ ktutil:  q
 
 ``` shell
 # kinit 获取并缓存 principal（当前主体）的初始票据授予票据（TGT），用于 Kerberos 系统进行身份安全验证
-$ kinit -k -t /home/ranger/bin/NetworkAutoAuth/aptiv.keytab ran.zhou@APTIV.COM # 大写的 @APTIV.COM
+$ kinit -k -t ~/NetworkAutoAuth/aptiv.keytab ran.zhou@APTIV.COM # 大写的 @APTIV.COM
 # APTIV 网络认证
 $ curl -v --negotiate -u : 'http://internet-ap.aptiv.com:6080/php/browser_challenge.php?vsys=1&rule=77&preauthid=&returnreq=y'
 ```
-
-
 
 #### 2.4 测试网络状态
 

@@ -80,7 +80,7 @@ def login(currentDir, email):
                 else:
                     logger.warning("用户认证失败...status_code: " + str(resp.status_code) + ", text: " + str(resp.text) + "\n")
             else:
-                logger.warning("shell 命令执行失败 - kinitres: " + str(kinitres) + ", curlres: " + str(curlres) + "\n")
+                logger.warning("shell 命令执行失败 - kinitres: " + str(kinitres) + ", curlres: " + str(curlres) + ", kinitcmd: " + str(kinitcmd) + ", curlcmd: " + str(curlcmd) + "\n")
     except Exception as e:
         logger.error("网络连接异常---Exception: " + str(e) + "\n")
         return
