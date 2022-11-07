@@ -9,7 +9,7 @@ sudo date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -
 sudo apt install krb5-user -y
 sudo apt install python3-pip -y
 sudo pip3 install schedule
-sudo apt install curl
+sudo apt install curl -y
 
 # 获取当前脚本绝对路径
 SCRIPT_DIR=$(cd $(dirname ${BASH_SOURCE[0]}); pwd) # $BASH_SOURCE是一个数组，它的第0个元素是脚本的名称
