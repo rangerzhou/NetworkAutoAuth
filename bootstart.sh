@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# version: v22.11.03
 # 1.同步时间(如果网络异常，获取的时间也会异常)
 sudo date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
 
 
 # 2.安装必要依赖
 sudo apt install krb5-user -y
+sudo apt install python3 -y
 sudo apt install python3-pip -y
 sudo pip3 install schedule
 sudo apt install curl -y

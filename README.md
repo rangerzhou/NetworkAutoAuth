@@ -1,6 +1,6 @@
 ---
-Author: ran.zhou@aptiv.com
-Version: v22.11.07
+Author: ranger.assist@gmail.com
+Version: v22.11.22
 ---
 
 
@@ -11,9 +11,9 @@ Version: v22.11.07
 
 **<font color = red>20221104更新：添加定时执行脚本；</font>**
 
-**<font color = red>20221103更新：简化脚本配置复杂度，仅 1 步即可完成配置；</font>**
+**<font color = red>20221103更新：简化脚本配置复杂度，1 行命令即可完成配置；</font>**
 
-脚本下载地址：https://confluence.asux.aptiv.com/pages/viewpage.action?pageId=313967372
+脚本下载地址：[内网 Confluence 链接](https://confluence.asux.aptiv.com/pages/viewpage.action?pageId=313967372)，[Gitee 链接](https://gitee.com/rangerzhou/NetworkAutoAuth)
 
 文件说明：
 
@@ -29,11 +29,11 @@ Version: v22.11.07
 
 ### 1. 一键完成配置
 
-**电脑第一次执行脚本需要联网状态，因为要安装可能缺失的依赖项，否则会产生因为无法联网导致无法安装依赖，无法安装依赖导致无法联网的死循环！！！**
+<font color=red>**电脑第一次执行脚本需要联网状态，因为要安装可能缺失的依赖项，否则会产生因为无法联网导致无法安装依赖，无法安装依赖导致无法联网的死循环！！！**</font>
 
-**电脑第一次执行脚本需要联网状态，因为要安装可能缺失的依赖项，否则会产生因为无法联网导致无法安装依赖，无法安装依赖导致无法联网的死循环！！！**
+<font color=red>**电脑第一次执行脚本需要联网状态，因为要安装可能缺失的依赖项，否则会产生因为无法联网导致无法安装依赖，无法安装依赖导致无法联网的死循环！！！**</font>
 
-**电脑第一次执行脚本需要联网状态，因为要安装可能缺失的依赖项，否则会产生因为无法联网导致无法安装依赖，无法安装依赖导致无法联网的死循环！！！**
+<font color=red>**电脑第一次执行脚本需要联网状态，因为要安装可能缺失的依赖项，否则会产生因为无法联网导致无法安装依赖，无法安装依赖导致无法联网的死循环！！！**</font>
 
 
 
